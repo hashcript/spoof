@@ -1,0 +1,46 @@
+questions:
+  - id: Q-01
+    text: "Is the hexstring meant to be recoverable from the output file (i.e. embed + extract round-trip), or does it only need to be present in the file's bytes?"
+    source: "README.md:2"
+    blocking: true
+    assumption: "It is recoverable: the tool is a reversible carrier, and an extraction/verification mode exists."
+  - id: Q-02
+    text: "Which image formats must be supported at first release — PNG only, or also JPEG, GIF, BMP, WebP?"
+    source: "README.md:2 ('An image', format unspecified)"
+    blocking: true
+    assumption: "PNG first (lossless, easy metadata carriage), other formats added later."
+  - id: Q-03
+    text: "Does 'adjusted' permit modifying pixel data (e.g. least-significant-bit steganography), or must the output be pixel-identical with the payload carried in metadata only?"
+    source: "README.md:2 ('adjusted file that displays identically')"
+    blocking: true
+    assumption: "Metadata-only carriage where the format allows it, so visual identity holds provably; LSB is the fallback for formats without metadata capacity."
+  - id: Q-04
+    text: "What implementation language and runtime should the tool use, and is a dependency-free (stdlib-only) implementation preferred?"
+    source: "README.md:2 (no language given)"
+    blocking: false
+    assumption: "Python 3, standard library only — see ADR 0001."
+  - id: Q-05
+    text: "Is the interface a command-line tool, a library, or both?"
+    source: "README.md:2 (no interface specified)"
+    blocking: false
+    assumption: "A CLI (`spoof embed <image> <hexstring>` / `spoof extract <image>`), structured so the core is importable as a library."
+  - id: Q-06
+    text: "Should there be a verification mode that extracts the hexstring back and/or compares the visual output against the original?"
+    source: "R-06 in requirements.md"
+    blocking: false
+    assumption: "Yes: an `extract` subcommand providing the round-trip, used by tests."
+  - id: Q-07
+    text: "Is there a maximum payload size relative to the image, and what should happen when the hexstring does not fit the carrier?"
+    source: "README.md:2 ('arbitrary hexstring')"
+    blocking: false
+    assumption: "No hard limit; embedding fails with a clear error if capacity is exceeded (R-10)."
+  - id: Q-08
+    text: "Should the tool write a new output file or modify the input in place, and how is the output path chosen?"
+    source: "README.md:2 ('outputs an adjusted file')"
+    blocking: false
+    assumption: "A new file is written (default `<input>_spoof.<ext>` or `-o` flag); the input is never modified (R-07)."
+  - id: Q-09
+    text: "What is the intended use case (e.g. watermarking, CTF challenges, file-tagging)? This decides how much the payload must resist stripping by re-encoding or hosting services, and shapes the threat model."
+    source: "README.md:1-2 (project name 'spoof')"
+    blocking: false
+    assumption: "Casual carriage: the payload is not required to survive re-encoding, re-compression or upload pipelines; only to display identically in ordinary viewers."
