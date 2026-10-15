@@ -1,0 +1,51 @@
+questions:
+  - id: Q-01
+    text: "The README sentence stops before saying what the hexstring is for. Must the output file's hash start with the hexstring, or does the hexstring have some other role (e.g. bytes to embed, a full hash to match)?"
+    source: "README.md line 2; R-05"
+    blocking: true
+    assumption: "The hash of the output file must start with the given hexstring (prefix match)."
+  - id: Q-02
+    text: "Which hash function is the prefix matched against: SHA-512, SHA-256, MD5, or a user-selectable one?"
+    source: "R-05; docs/adr/0003-metadata-nonce-brute-force.md"
+    blocking: true
+    assumption: "SHA-512 over the whole output file, with a design that lets another algorithm be added later."
+  - id: Q-03
+    text: "Which image formats must be supported in the first release? Is PNG + JPEG enough, or are GIF, WebP, BMP, TIFF or HEIC also needed?"
+    source: "R-08; docs/adr/0002-supported-formats-png-jpeg.md"
+    blocking: false
+    assumption: "PNG and JPEG only. Anything else is rejected with a clear error."
+  - id: Q-04
+    text: "Does 'displays identically to the human eye' allow pixel changes that are invisible (e.g. least-significant-bit tweaks), or must decoded pixels be bit-for-bit identical?"
+    source: "README.md line 2; R-04"
+    blocking: false
+    assumption: "Decoded pixels must be bit-for-bit identical. Only ignorable metadata may change."
+  - id: Q-05
+    text: "What exact command-line interface do you expect (argument order, flags, whether '0x' is accepted, odd-length hexstrings), and should the digest be printed on success?"
+    source: "R-06, R-07, R-11"
+    blocking: false
+    assumption: "`spoof <hexstring> <input> <output>`; optional 0x; case-insensitive; odd lengths matched by nibble; digest printed to stdout."
+  - id: Q-06
+    text: "What is the longest prefix users will realistically ask for, and how long may one run take? Should there be a timeout or a hard limit on prefix length?"
+    source: "R-13, R-14; docs/architecture/nfr-and-threats.md"
+    blocking: false
+    assumption: "Up to about 8 hex digits within minutes on a multi-core laptop. A configurable timeout, plus a warning above 10 digits."
+  - id: Q-07
+    text: "Is there a required implementation language or distribution channel (pip package, Homebrew, single binary, Docker image)?"
+    source: "R-16; docs/adr/0001-language-go.md"
+    blocking: false
+    assumption: "Go, shipped as a static single binary per OS/architecture."
+  - id: Q-08
+    text: "Should existing metadata (EXIF, GPS, ICC profiles, text chunks) be preserved as-is, stripped, or is either acceptable?"
+    source: "R-12; docs/architecture/nfr-and-threats.md (information disclosure)"
+    blocking: false
+    assumption: "Preserved byte-for-byte; spoof only adds its own nonce block."
+  - id: Q-09
+    text: "Must the output be reproducible, i.e. the same input and hexstring always give the same output file?"
+    source: "docs/architecture/seq-spoof-image.md (parallel search)"
+    blocking: false
+    assumption: "Not required. Whichever worker finds a match first wins, so outputs can differ between runs."
+  - id: Q-10
+    text: "Is it acceptable that the output uses a non-standard ancillary block (a private PNG chunk, or a JPEG COM placed late in the file) that strict validators might warn about?"
+    source: "docs/adr/0003-metadata-nonce-brute-force.md"
+    blocking: false
+    assumption: "Yes. Mainstream viewers ignore these blocks, and the tool checks that the output decodes to identical pixels."
